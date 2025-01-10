@@ -1,0 +1,368 @@
+API Postman para whatsapp
+-------------------------
+https://www.postman.com/meta/whatsapp-business-platform/folder/75fbr80/api-reference
+
+
+
+Data a enviar en los distintos tipos de mensajes
+------------------------------------------------
+Method: POST
+URL: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages (Version: v20.0)
+Authorization:
+Auth Type: Bearer Token
+Token: ''
+
+Headers:
+Key: Content-Type --- value: application/json
+
+
+
+Data según el tipo de mensaje
+-----------------------------
+
+Mensaje de texto
+Body: 
+{
+    "messaging_product": "whatsapp",    
+    "recipient_type": "individual",
+    "to": "{{Recipient-Phone-Number}}",
+    "type": "text",
+    "text": {
+        "preview_url": false,
+        "body": "text-message-content"
+    }
+}
+
+Mensaje de texto con formato(negrita, cursiva, tachado, codigo)
+Body: 
+{
+    "messaging_product": "whatsapp",    
+    "recipient_type": "individual",
+    "to": "{{Recipient-Phone-Number}}",
+    "type": "text",
+    "text": {
+        "body": "*Hola usuario* - _Hola usuario_ - ~Hola usuario~ - ```Hola usuario```""text-message-content"
+    }
+}
+
+Mensaja de texto con URL
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "{{Recipient-Phone-Number}}",
+    "text": {
+        "preview_url": true,
+        "body": "Please visit https://youtu.be/hpltvTEiRrY to inspire your day!"
+    }
+}
+
+Mensaje con imagen
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "image",
+    "image": {
+        "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.jpg"
+    }
+}
+
+Mensaje con audio
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "audio",
+    "audio": {
+        "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.mp3"
+    }
+}
+
+Mensaje con documento
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "document",
+    "document": {
+        "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.pdf",
+        "caption": "Titulo del documento"
+    }
+}
+
+Mensaje con video
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "video",
+    "video": {
+        "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.mp4",
+        "caption": "Titulo del video"
+    }
+}
+
+Mensaje con sticker
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "sticker",
+    "sticker": {
+        "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.webp"
+    }
+}
+
+Mensaje con localizacion
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "location",
+    "location": {
+        "latitude": "-28.452925850805755",
+        "longitude": "-65.7575180790931",
+        "name": "Casa",
+        "address": "Av Recalde 2120"
+    }
+}
+
+Mensajes con botones (copiar emojis de la web: https://getemoji.com/)
+Body:
+{
+    "messaging_product": "whatsapp",
+    "recipient_type": "individual",
+    "to": "54383154241994",
+    "type": "interactive",
+    "interactive": {
+        "type": "button",
+        "body": {
+            "text": "¿Confirmas tu registro?"
+        },
+        "action": {
+            "buttons": [
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "001",
+                        "title": "✅Si"
+                    }
+                },
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "002",
+                        "title": "❌No"
+                    }
+                }
+            ]
+        }
+    }
+}
+
+Mensajes con botones y con título
+Body:
+{
+    "messaging_product": "whatsapp",
+    "recipient_type": "individual",
+    "to": "54383154241994",
+    "type": "interactive",
+    "interactive": {
+        "type": "button",
+        "header": {
+            "type": "text",
+            "text": "Identificación de usuario"
+        },
+        "body": {
+            "text": "¿Confirmas tu registro?"
+        },
+        "action": {
+            "buttons": [
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "001",
+                        "title": "✅Si"
+                    }
+                },
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "002",
+                        "title": "❌No"
+                    }
+                }
+            ]
+        }
+    }
+}
+
+Mensajes con botones y con imagen
+Body:
+{
+    "messaging_product": "whatsapp",
+    "recipient_type": "individual",
+    "to": "54383154241994",
+    "type": "interactive",
+    "interactive": {
+        "type": "button",
+        "header": {
+            "type": "image",
+            "image": {
+                "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.jpg"
+            }
+        },
+        "body": {
+            "text": "¿Confirmas tu registro?"
+        },
+        "action": {
+            "buttons": [
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "001",
+                        "title": "✅Si"
+                    }
+                },
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "002",
+                        "title": "❌No"
+                    }
+                }
+            ]
+        }
+    }
+}
+
+Mensajes con botones y documento
+Body:
+{
+    "messaging_product": "whatsapp",
+    "recipient_type": "individual",
+    "to": "54383154241994",
+    "type": "interactive",
+    "interactive": {
+        "type": "button",
+        "header": {
+            "type": "document",
+            "document": {
+                "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.jpg",
+                "filename": "Mi documento"
+            }
+        },
+        "body": {
+            "text": "¿Confirmas tu registro?"
+        },
+        "action": {
+            "buttons": [
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "001",
+                        "title": "✅Si"
+                    }
+                },
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "002",
+                        "title": "❌No"
+                    }
+                }
+            ]
+        }
+    }
+}
+
+Mensajes con botones y video
+Body:
+{
+    "messaging_product": "whatsapp",
+    "recipient_type": "individual",
+    "to": "54383154241994",
+    "type": "interactive",
+    "interactive": {
+        "type": "button",
+        "header": {
+            "type": "video",
+            "video": {
+                "link": "https://botwhatsappsample.blob.core.windows.net/images/minion.mp4"                
+            }
+        },
+        "body": {
+            "text": "¿Confirmas tu registro?"
+        },
+        "action": {
+            "buttons": [
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "001",
+                        "title": "✅Si"
+                    }
+                },
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": "002",
+                        "title": "❌No"
+                    }
+                }
+            ]
+        }
+    }
+}
+
+Mensajes con listas
+Body:
+{
+    "messaging_product": "whatsapp",
+    "to": "54383154241994",
+    "type": "interactive",
+    "interactive": {
+        "type": "list",
+        "body": {
+            "text": "✅ I have these options"
+        },
+        "footer": {
+            "text": "Select an option"
+        },
+        "action": {
+            "button": "See options",
+            "sections": [
+                {
+                    "title": "Buy and sell products",
+                    "rows": [
+                        {
+                            "id": "main-buy",
+                            "title": "Buy",
+                            "description": "Buy the best product your home"
+                        },
+                        {
+                            "id": "main-sell",
+                            "title": "Sell",
+                            "description": "Sell your products"
+                        }
+                    ]
+                },
+                {
+                    "title": "📍center of attention",
+                    "rows": [
+                        {
+                            "id": "main-agency",
+                            "title": "Agency",
+                            "description": "Your can visit our agency"
+                        },
+                        {
+                            "id": "main-contact",
+                            "title": "Contact center",
+                            "description": "One of our agents will assist you"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
