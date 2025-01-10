@@ -8,7 +8,6 @@ from fastapi.templating import Jinja2Templates
 from base.load_env import load_env
 from apps.chatbot.routes import router as chatbot_router
 from apps.file_management.routes import router as file_management_router
-from apps.embedded_chat.routes import router as embedded_chatbot_router
 from apps.whatsapp.routes import router as whatsapp_router
 from apps.scraper.routes import router as scraper_router
 from apps.login.routes import router as login_router
@@ -24,14 +23,6 @@ app = FastAPI()
 
 app.add_middleware(SessionMiddleware, secret_key="ijdjandsncl as23nff m,")
 
-app.mount("/login_static", StaticFiles(directory="apps/login/static"), name="login_static")
-app.mount("/backoffice_static", StaticFiles(directory="apps/backoffice/static"), name="backoffice_static")
-app.mount("/files_static", StaticFiles(directory="apps/file_management/static"), name="files_static")
-app.mount("/chatbot_static", StaticFiles(directory="apps/chatbot/static"), name="chatbot_static")
-
-# Configuración de plantillas Jinja2, si se modifica aquí, se debe modificar en todos los routes
-templates = Jinja2Templates(directory=["shared_templates", "apps/backoffice/templates", "apps/file_management/templates", "apps/chatbot/templates"])
-
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
@@ -40,6 +31,14 @@ app.add_middleware(
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, etc.)
     allow_headers=["*"],  # Permite todos los encabezados
 )
+
+app.mount("/login_static", StaticFiles(directory="apps/login/static"), name="login_static")
+app.mount("/backoffice_static", StaticFiles(directory="apps/backoffice/static"), name="backoffice_static")
+app.mount("/files_static", StaticFiles(directory="apps/file_management/static"), name="files_static")
+app.mount("/chatbot_static", StaticFiles(directory="apps/chatbot/static"), name="chatbot_static")
+
+# Configuración de plantillas Jinja2, si se modifica aquí, se debe modificar en todos los routes
+templates = Jinja2Templates(directory=["shared_templates", "apps/backoffice/templates", "apps/file_management/templates", "apps/chatbot/templates"])
 
 # Incluir routers
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])

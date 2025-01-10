@@ -2,7 +2,9 @@ import os
 from fastapi import APIRouter, HTTPException, UploadFile, File, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
+
 from base.load_env import load_env
+from base.sessions import require_session
 
 from apps.chatbot.routes import create_embeddings
 
@@ -16,6 +18,11 @@ templates = Jinja2Templates(directory=["shared_templates", "apps/backoffice/temp
 @router.get("/list_files", response_class=HTMLResponse)
 async def list_files(request: Request): 
     """ Listar los archivos que formaran parte de la base de conocimiento."""
+    # Verifico si el usuario tiene una sesión activa
+    response = require_session(request)
+    if isinstance(response, RedirectResponse):
+        return response 
+    
     if not os.path.exists(upload_directory):
         os.makedirs(upload_directory, exist_ok=True)        
     files = os.listdir(upload_directory)
