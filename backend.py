@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 
 from base.load_env import load_env
 from apps.chatbot.routes import router as chatbot_router
@@ -18,7 +19,6 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 upload_directory = os.getenv("PATH_TO_UPLOAD_FOLDER")
 
-# Instancia de la aplicación FastAPI
 app = FastAPI()
 
 app.add_middleware(SessionMiddleware, secret_key="ijdjandsncl as23nff m,")
@@ -38,7 +38,16 @@ app.mount("/files_static", StaticFiles(directory="apps/file_management/static"),
 app.mount("/chatbot_static", StaticFiles(directory="apps/chatbot/static"), name="chatbot_static")
 
 # Configuración de plantillas Jinja2, si se modifica aquí, se debe modificar en todos los routes
-templates = Jinja2Templates(directory=["shared_templates", "apps/backoffice/templates", "apps/file_management/templates", "apps/chatbot/templates"])
+templates = Jinja2Templates(directory=[
+    "shared_templates", 
+    "apps/backoffice/templates", 
+    "apps/file_management/templates", 
+    "apps/chatbot/templates"
+    ])
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/auth/login")
 
 # Incluir routers
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
