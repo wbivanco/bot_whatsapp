@@ -7,6 +7,12 @@
 Esto es necesario porque el servidor Azure es en GNU/Linux y tiene la versión de Python (3.10)
 que tiene problemas con la versión de la librería de Chroma. 
 
+- En la web app de Azure, tener seteado las siguientes secciones del menú:
+  * variables de entorno
+    SCM_DO_BUILD_DURING_DEPLOYMENT = true
+  * configuración -> comando de inicio
+    gunicorn -k uvicorn.workers.UvicornWorker backend:app
+
 - Descomentar en requirements.txt la linea de:
   pysqlite3-binary
 
