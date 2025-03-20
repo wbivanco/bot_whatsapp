@@ -13,6 +13,7 @@ def send_message_whatsapp(data, token, url):
             return True
         
         return False
-    except Exception as exception:
-        print(exception)
+    except requests.exceptions.RequestException as exception:
+        print("Error en la petición:", str(exception))
         return False
+    

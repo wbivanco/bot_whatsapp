@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, FastAPI, Request, HTTPException
+from fastapi import APIRouter, FastAPI, Request, HTTPException, Response
 from pydantic import BaseModel
 
 from .utils.message_formatting import text_message
@@ -18,16 +18,29 @@ load_env()
 token_whatsapp = os.getenv("TOKEN_WHATSAPP")
 api_url = os.getenv("API_URL")
 
+def catamarca_phone_number_formateator(number):
+    """ Formatea el número de teléfono de Catamarca, esto evita el error de que no llega el mensaje."""
+    # Eliminar el tercer carácter
+    number_temp = number[:2] + number[3:]
+    # Insertar '15' entre el quinto y sexto carácter
+    final_number = number_temp[:5] + '15' + number_temp[5:]
+    
+    return final_number
+
+@router.get("/hola")
+async def hello():
+    return {"message": "Hola mundo"}
+
 @router.get("/whatsapp")
 async def verify_token(request: Request):
     """ Recibe una petición de Meta con el token que se cargo en su plataforma, debe ser igual al que figura en access_token. """
     try:
-        access_token = "sdfsffdasfrwerwe3412"
+        access_token = "98765"
         token = request.query_params.get('hub.verify_token')
         challenge = request.query_params.get('hub.challenge')
 
         if token is not None and challenge is not None and token == access_token:
-            return challenge
+            return Response(content=challenge, media_type="text/plain")
         else:
             raise HTTPException(status_code=400, detail="Token o challenge no válido")
     except:
@@ -43,28 +56,29 @@ async def received_message(request: Request):
         value = changes['value']
         message = value['messages'][0]
         number = message['from']
+        # Formateo el numero de teléfono para no tener problema
+        number = catamarca_phone_number_formateator(number)
         
         # Verifica el tipo de mensaje que se recibe, si es texto o interactivo y retorna el texto.
         text = get_text_user(message)    
-       
+        
         # Verifica el contenido de text y de acuero a eso arma la lista de mensajes a enviar
         list_data = process_message(text, number)
-       
+        
         for item in list_data:
             
             # Verifica el contenido del mensaje y de acuerdo a eso determina si usa el chatbot o no
             if not item["type"]:  
-                
                 responsegpt = chatgpt_service.get_bot_response(text)
-
+                
                 if responsegpt != "error":
                     data = text_message(responsegpt, number)
                 else:
                     data = text_message("Ocurrio un error en el envió del mensaje", number)
+
+                whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
             else:
-                
-                data = item["data"]
-            whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
+                whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
          
         return {"status": "EVENT_RECEIVED"}
     except:

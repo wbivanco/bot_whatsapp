@@ -52,7 +52,7 @@ async def root():
 # Incluir routers
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
 app.include_router(file_management_router, prefix="/files", tags=["File Management"])
-app.include_router(whatsapp_router, prefix="/whatsapp_bot", tags=["WhatsApp Bot"])
+app.include_router(whatsapp_router, prefix="/bot_whatsapp", tags=["WhatsApp Bot"])
 app.include_router(scraper_router, prefix="/scraper", tags=["Scraper"])
 app.include_router(login_router, prefix="/auth", tags=["Login"])
 app.include_router(backoffice_router, prefix="/backoffice", tags=["Backoffice"])
