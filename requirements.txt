@@ -16,4 +16,4 @@ python-dotenv
 itsdangerous
 langchain-chroma
 chromadb
-#pysqlite3-binary # Solo necesaria en Azure
+pysqlite3-binary # Solo necesaria en Azure

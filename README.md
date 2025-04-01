@@ -1,6 +1,8 @@
 # Inicia el servidor de backend:
     uvicorn backend:app --reload
 
+# Correr el servidor de Ngrok en local, para disponer la app en internet con dominio propio(de prueba) y SSL
+ngrok http --url=clearly-prime-eel.ngrok-free.app 8000
 
 # Para desplegar en Azure hacer los siguientes cambios:
 -------------------------------------------------------

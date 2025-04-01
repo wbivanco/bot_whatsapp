@@ -19,7 +19,13 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 upload_directory = os.getenv("PATH_TO_UPLOAD_FOLDER")
 
-app = FastAPI()
+app = FastAPI(
+    title="HumaBot API",
+    description="API para el bot de Whatsapp de la Facultad de Humanidades",
+    version="0.1.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+)
 
 app.add_middleware(SessionMiddleware, secret_key="ijdjandsncl as23nff m,")
 
@@ -45,7 +51,7 @@ templates = Jinja2Templates(directory=[
     "apps/chatbot/templates"
     ])
 
-@app.get("/")
+@app.get("/", tags=["Redirection to login"])
 async def root():
     return RedirectResponse(url="/auth/login")
 
