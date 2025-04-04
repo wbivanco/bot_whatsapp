@@ -48,11 +48,18 @@ def process_message(text, number):
     list_data = []
 
     # Ordenamos las keywords de más específicas a más generales
-    posgrado_keywords = ["posgrado", "postgrado", "maestría", "doctorado"]
-    diplomaturas_keywords = ["diplomatura", "especialización", "curso corto"]
-    grado_keywords = ["carreras de grado", "licenciatura", "grado"]
-    saludos = ["hola", "buenas", "qué tal", "saludos"]
-    despedidas = ["gracias", "muchas gracias", "adiós", "nos vemos"]
+    posgrado_keywords = ["posgrado", "postgrado", "postgrados", "posgrado", "maestría", "maestrías",
+                         "maestria", "maestrias", "especialización", "especiacializaciones", 
+                         "doctorado", "doctorados"]
+    diplomaturas_keywords = ["diplomatura", "diplomaturas"]
+    grado_keywords = ["carreras de grado", "licenciatura", "licenciaturas", "grado", "profesorado", "profesorados"]
+    saludos = ["hola", "buenas", "qué tal", "saludos", "buenos días", "buenas tardes", "buenas noches", "buen día", 
+               "buen dia", "como estás", "como estas", "como andas", "como andás", "como andas?", "como andás?",]
+    despedidas = ["gracias", "muchas gracias", "adiós", "nos vemos", "hasta luego", "chau", "hasta pronto"]
+    autoridades = ["autoridades", "autoridad", "autoridad de la facultad", "autoridades de la facultad"]
+    ingreso = ["ingreso", "ingresantes", "ingresantes 2025"]
+    centro_estudiantes = ["centro de estudiantes", "centro de estudiantes de la facultad", "centro de estudiantes de la facultad de humanidades"]
+    siu = ["siu", "siu guarani", "siu guaraní", "acceso siu", "acceso siu guaraní", "acceso siu guarani"]
 
     if find_whole_word(text, saludos):
         data = mf.text_message("Hola como puedo ayudarte", number)
@@ -67,6 +74,18 @@ def process_message(text, number):
         list_data.append({'data': data, 'type': True})
     elif find_whole_word(text, grado_keywords):
         data = mf.text_message("Listado de la carreras de grado: https://huma.unca.edu.ar/oferta-academica/grado", number)
+        list_data.append({'data': data, 'type': True})
+    elif find_whole_word(text, autoridades):
+        data = mf.text_message("Autoridades de la Facultad: https://huma.unca.edu.ar/institucional/autoridades", number)
+        list_data.append({'data': data, 'type': True})
+    elif find_whole_word(text, ingreso):
+        data = mf.text_message("Información para los ingresantes: https://huma.unca.edu.ar/alumnos/ingreso-2025", number)
+        list_data.append({'data': data, 'type': True})
+    elif find_whole_word(text, centro_estudiantes):
+        data = mf.text_message("Información de Interés de Centro de estudiantes: https://huma.unca.edu.ar/alumnos/centro-de-estudiantes", number)
+        list_data.append({'data': data, 'type': True})
+    elif find_whole_word(text, siu):
+        data = mf.text_message("Acceso al SIU Guaraní: https://guarani.unca.edu.ar/", number)
         list_data.append({'data': data, 'type': True})
     elif find_whole_word(text, despedidas):
         data = mf.text_message("Muchas gracias por haberte comunicado", number)
