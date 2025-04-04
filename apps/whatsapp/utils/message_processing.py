@@ -1,4 +1,5 @@
 from . import message_formatting as mf
+import re
 
 def get_text_user(message):
     """ Verifica el tipo de mensaje que se recibe, si es texto o interactivo y retorna el 
@@ -23,6 +24,10 @@ def get_text_user(message):
 
     return text
 
+def find_whole_word(text, keywords):
+    """Busca coincidencias de palabras completas en el texto."""
+    return any(re.search(r'\b' + re.escape(kw) + r'\b', text) for kw in keywords)
+
 def process_message(text, number):
     """ Verifica el contenidp de la variables text y de acuerdo a ello arma la lista de diccionarios, si en el texto no está
     algunas de las palabra que se chequea en los if, es decir sale por else, se agrega la clave type con el valor False. 
@@ -42,27 +47,28 @@ def process_message(text, number):
     text = text.lower()
     list_data = []
 
-    saludos = ["hola", "buenas", "qué tal", "saludos"]
-    grado_keywords = ["grado", "carreras de grado", "universitario", "licenciatura"]
-    posgrado_keywords = ["posgrado", "maestría", "doctorado", "postgrado"]
+    # Ordenamos las keywords de más específicas a más generales
+    posgrado_keywords = ["posgrado", "postgrado", "maestría", "doctorado"]
     diplomaturas_keywords = ["diplomatura", "especialización", "curso corto"]
+    grado_keywords = ["carreras de grado", "licenciatura", "grado"]
+    saludos = ["hola", "buenas", "qué tal", "saludos"]
     despedidas = ["gracias", "muchas gracias", "adiós", "nos vemos"]
 
-    if any(kw in text for kw in saludos):
-       data = mf.text_message("Hola como puedo ayudarte", number)
-       data_buttons = mf.buttons_message(number, "Nuestra propuesta", buttons=["Grado", "Posgrado", "Diplomaturas"])
-       list_data.append({'data': data, 'type': True})
-       list_data.append({'data': data_buttons, 'type': True}) 
-    elif any(kw in text for kw in grado_keywords):
-        data = mf.text_message("Listado de la carreras de grado: https://huma.unca.edu.ar/oferta-academica/grado", number)
+    if find_whole_word(text, saludos):
+        data = mf.text_message("Hola como puedo ayudarte", number)
+        data_buttons = mf.buttons_message(number, "Nuestra propuesta", buttons=["Grado", "Posgrado", "Diplomaturas"])
         list_data.append({'data': data, 'type': True})
-    elif any(kw in text for kw in posgrado_keywords):
+        list_data.append({'data': data_buttons, 'type': True}) 
+    elif find_whole_word(text, posgrado_keywords):
         data = mf.text_message("Listado de la carreras de posgrado: https://huma.unca.edu.ar/oferta-academica/posgrado", number)
         list_data.append({'data': data, 'type': True})
-    elif any(kw in text for kw in diplomaturas_keywords):
+    elif find_whole_word(text, diplomaturas_keywords):
         data = mf.text_message("Listado de la carreras de diplomaturas: https://huma.unca.edu.ar/oferta-academica/diplomaturas", number)
         list_data.append({'data': data, 'type': True})
-    elif any(kw in text for kw in despedidas):
+    elif find_whole_word(text, grado_keywords):
+        data = mf.text_message("Listado de la carreras de grado: https://huma.unca.edu.ar/oferta-academica/grado", number)
+        list_data.append({'data': data, 'type': True})
+    elif find_whole_word(text, despedidas):
         data = mf.text_message("Muchas gracias por haberte comunicado", number)
         list_data.append({'data': data, 'type': True})
     else:

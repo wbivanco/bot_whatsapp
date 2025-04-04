@@ -1,6 +1,9 @@
 # Inicia el servidor de backend:
     uvicorn backend:app --reload
 
+# URL a la web app de prueba de Azure, utilizada como URL de devolución de llamada del Webhook
+https://test-humanidades-wa.azurewebsites.net/bot_whatsapp/whatsapp
+
 # Correr el servidor de Ngrok en local, para disponer la app en internet con dominio propio(de prueba) y SSL
 ngrok http --url=clearly-prime-eel.ngrok-free.app 8000
 
