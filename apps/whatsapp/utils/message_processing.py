@@ -62,8 +62,8 @@ def process_message(text, number):
     siu = ["siu", "siu guarani", "siu guaraní", "acceso siu", "acceso siu guaraní", "acceso siu guarani"]
 
     if find_whole_word(text, saludos):
-        data = mf.text_message("Hola como puedo ayudarte", number)
-        data_buttons = mf.buttons_message(number, "Nuestra propuesta", buttons=["Grado", "Posgrado", "Diplomaturas"])
+        data = mf.text_message("Hola soy HumaChat tu asistente virtual de la Facultad de Humanidades", number)
+        data_buttons = mf.buttons_message(number, "Escribi el número o palabra clave de la opción que necesitas", buttons=["1 - Inscripciones e Ingresi 2025", "2 -Reinscripciones y Materias", "3 - Exámenes Finales"])
         list_data.append({'data': data, 'type': True})
         list_data.append({'data': data_buttons, 'type': True}) 
     elif find_whole_word(text, posgrado_keywords):
