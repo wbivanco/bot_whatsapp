@@ -75,17 +75,60 @@ def process_message(text, number):
     if find_whole_word(text, saludos):
         data = mf.text_message("Hola, soy HumaChat tu asistente virtual de la Facultad de Humanidades.", number)
         #data_buttons = mf.buttons_message(number, "Escribí el número o palabra clave de la opción que necesitás", buttons=["1 - Inscripciones", "2 - Reinscripciones", "3 - Exámenes"])
-        data_options = mf.text_message("Escribí el número o palabra clave de la opción que necesitás: \n\n" \
-        "1 Inscripciones e Ingreso 2025\n" \
-        "2 Reinscripciones y Materias \n" \
-        "3 Exámenes Finales\n" \
-        "4 Equivalencias \n" \
-        "5 Título, Colación y Egresos \n" \
-        "6 Calendario Académico \n" \
-        "7 Oferta Académica \n" \
-        "8 Reglamento de Alumnos \n" \
-        "9 Contactos y Enlaces Utiles \n" \
-        , number)
+        # data_options = mf.text_message("Escribí el número o palabra clave de la opción que necesitás: \n\n" \
+        # "1 Inscripciones e Ingreso 2025\n" \
+        # "2 Reinscripciones y Materias \n" \
+        # "3 Exámenes Finales\n" \
+        # "4 Equivalencias \n" \
+        # "5 Título, Colación y Egresos \n" \
+        # "6 Calendario Académico \n" \
+        # "7 Oferta Académica \n" \
+        # "8 Reglamento de Alumnos \n" \
+        # "9 Contactos y Enlaces Utiles \n" \
+        # , number)
+        sections = [
+            {
+                "title": "Calendario Académico",
+                "rows": [
+                    {
+                        "id": "calendario-inicio",
+                        "title": "Inicio y Finalización de",
+                        "description": "Aquí puede ir una breve descripción"
+                    },
+                    {
+                        "id": "calendario-inscripciones",
+                        "title": "Inscripciones 1° Año de ",
+                        "description": "Aquí puede ir una breve descripción"
+                    }
+                ]
+            },
+            {
+                "title": "Reglamento de Alumnos",
+                "rows": [
+                    {
+                        "id": "reglamento-adminsion",
+                        "title": "Regimen de Admisión del2",
+                        "description": "Aquí puede ir una breve descripción"
+                    },
+                    {
+                        "id": "reglamento-readmicion",
+                        "title": "Regimen de Readmición",
+                        "description": "Aquí puede ir una breve descripción"
+                    }
+                ]
+            },
+            {
+                "title": "Instructivo Inscripción",
+                "rows": [
+                    {
+                        "id": "ingreso",
+                        "title": "Como Inscribirse",
+                        "description": "Aquí puede ir una breve descripción"
+                    }
+                ]
+            }
+        ]
+        data_options = mf.list_message(number, sections)
         list_data.append({'data': data, 'type': True})
         list_data.append({'data': data_options, 'type': True}) 
     elif find_whole_word(text, inscripciones):  

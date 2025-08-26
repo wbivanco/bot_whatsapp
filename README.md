@@ -1,23 +1,21 @@
-# Inicia el servidor de backend:
+# Inicia el servidor de local backend:
 
     uvicorn backend:app --reload
 
+# Correr el servidor de Ngrok en local, para disponer la app en internet con dominio propio(de prueba) y SSL
+
+    ngrok http --url=clearly-prime-eel.ngrok-free.app 8000
+
 # URL a la web app de prueba de Azure, utilizada como URL de devolución de llamada del Webhook
 
-https://test-humanidades-wa.azurewebsites.net/bot_whatsapp/whatsapp
+    https://test-humanidades-wa.azurewebsites.net/bot_whatsapp/whatsapp
 
 # URL a la web app de prueba local, utilizada como URL de devolución de llamada del Webhook
 
-https://clearly-prime-eel.ngrok-free.app/bot_whatsapp/whatsapp
-
-# Correr el servidor de Ngrok en local, para disponer la app en internet con dominio propio(de prueba) y SSL
-
-ngrok http --url=clearly-prime-eel.ngrok-free.app 8000
+    https://clearly-prime-eel.ngrok-free.app/bot_whatsapp/whatsapp
 
 # Para desplegar en Azure hacer los siguientes cambios:
-
 ---
-
 Esto es necesario porque el servidor Azure es en GNU/Linux y tiene la versión de Python (3.10)
 que tiene problemas con la versión de la librería de Chroma.
 

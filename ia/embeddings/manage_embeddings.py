@@ -2,9 +2,9 @@
 # import sys
 # sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Chroma
-from langchain_chroma import Chroma
+# from langchain_openai import OpenAIEmbeddings
+# from langchain_community.vectorstores import Chroma
+# from langchain_chroma import Chroma
 
 from .utils import Utils
 
