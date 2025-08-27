@@ -2,9 +2,9 @@
 # import sys
 # sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-# from langchain_openai import OpenAIEmbeddings
-# from langchain_community.vectorstores import Chroma
-# from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 
 from .utils import Utils
 
@@ -33,7 +33,7 @@ class EmbeddingsManager:
         """ Define e inicializa el modelo a utilizar en la generación de embeddings. """        
         try:
             if self.embeddings_provider == "openai":
-                embeddings_model = OpenAIEmbeddings(api_key=api_key)
+                embeddings_model = OpenAIEmbeddings(api_key=api_key, model="text-embedding-3-small")
         except Exception as e:
             print(f"Error al cargar el tipo de modelo de Embedding: {e}")
             embeddings_model = None 
