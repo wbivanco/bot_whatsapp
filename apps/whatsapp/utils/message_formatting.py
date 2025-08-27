@@ -191,23 +191,23 @@ def list_message(number, sections):
         for row in section["rows"]:
             formatted_row = {
                 "id": row["id"],
-                "title": row["title"],
-                "description": row["description"]
+                "title": row["title"] 
             }
             formatted_section["rows"].append(formatted_row)
         formatted_sections.append(formatted_section)
 
     data = {
             "messaging_product": "whatsapp",
+            "recipient_type": "individual",
             "to": number,
             "type": "interactive",
             "interactive": {
                 "type": "list",
                 "body": {
-                    "text": "✅ Tengo estas opciones"
+                    "text": "✅ Tengo estas opciones para ti:"
                 },
                 "footer": {
-                    "text": "Seleccione una opción"
+                    "text": "Selecciona una opción de la lista"
                 },
                 "action": {
                     "button": "Ver opciones",

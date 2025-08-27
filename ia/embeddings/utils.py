@@ -5,11 +5,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 class Utils:
     @staticmethod
-    def generate_chunks(documento, chunk_size=3000, chunk_overlap=40):
+    def generate_chunks(documento, chunk_size=1000, chunk_overlap=200):
         """ Divide un documento en fragmentos de texto. """
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap
+            chunk_overlap=chunk_overlap,
+            separators=["\n\n", "\n", ". ", " ", ""]  # Separadores más específicos
         )
         document_chunks = text_splitter.split_documents(documento)
 

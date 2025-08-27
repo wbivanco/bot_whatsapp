@@ -70,13 +70,17 @@ async def received_message(request: Request):
             # Verifica el contenido del mensaje y de acuerdo a eso determina si usa el chatbot o no
             if not item["type"]:  
                 responsegpt = chatgpt_service.get_bot_response(text)
-                
+
                 if responsegpt != "error":
                     data = text_message(responsegpt, number)
                 else:
                     data = text_message("Ocurrio un error en el envió del mensaje", number)
 
                 whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
+                
+                # Enviar mensaje adicional invitando a hacer más preguntas
+                follow_up_message = text_message("💡 Si mi respuesta no fue lo que esperabas o tienes más dudas, ¡no dudes en preguntarme! Estoy aquí para ayudarte con cualquier consulta sobre trámites de la facultad.", number)
+                whatsapp_service.send_message_whatsapp(follow_up_message, token_whatsapp, api_url)
             else:
                 whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
          
