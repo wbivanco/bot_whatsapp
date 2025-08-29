@@ -24,7 +24,8 @@ que tiene problemas con la versión de la librería de Chroma.
   - variables de entorno
     SCM_DO_BUILD_DURING_DEPLOYMENT = true
   - configuración -> comando de inicio
-    gunicorn -k uvicorn.workers.UvicornWorker backend:app
+    python -m uvicorn backend:app --host 0.0.0.0 --port 8000
+    # gunicorn -k uvicorn.workers.UvicornWorker backend:app (versión anterior)
 
 - Descomentar en requirements.txt la linea de:
   pysqlite3-binary
