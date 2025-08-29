@@ -17,4 +17,4 @@ itsdangerous
 langchain-chroma
 chromadb
 pypdf
-# pysqlite3-binary # Solo necesaria en Azure
+pysqlite3-binary # Solo necesaria en Azure
