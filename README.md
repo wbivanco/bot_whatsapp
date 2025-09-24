@@ -35,6 +35,10 @@ que tiene problemas con la versión de la librería de Chroma.
   import sys
   sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
+# Video donde muestra como hacer para registrar el número de teléfono 
+
+  https://www.youtube.com/watch?v=4eUwiK1C4JI
+
 # Para generar los distintos archivos con el scraper hay que pasar los valores en el body:
 
 ---
