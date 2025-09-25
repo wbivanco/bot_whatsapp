@@ -82,9 +82,6 @@ async def received_message(request: Request):
                 follow_up_message = text_message("💡 Si mi respuesta no fue lo que esperabas o tienes más dudas, ¡no dudes en preguntarme! Estoy aquí para ayudarte con cualquier consulta sobre trámites de la facultad.", number)
                 whatsapp_service.send_message_whatsapp(follow_up_message, token_whatsapp, api_url)
             else:
-                print("---------####---------")
-                print(item["data"])
-                print("---------####---------")
                 whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
          
         return {"status": "EVENT_RECEIVED"}
