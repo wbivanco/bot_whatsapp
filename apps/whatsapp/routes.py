@@ -3,7 +3,7 @@ from fastapi import APIRouter, FastAPI, Request, HTTPException, Response
 from pydantic import BaseModel
 
 from .utils.message_formatting import text_message
-from .utils.message_processing import get_text_user, process_message
+from .utils.message_processing import get_text_user, process_message, set_user_state, show_navigation_buttons, get_user_state
 import apps.whatsapp.services.whatsapp_service as whatsapp_service
 import apps.whatsapp.services.chatgpt_service as chatgpt_service
 from base.load_env import load_env
@@ -54,6 +54,12 @@ async def received_message(request: Request):
         entry = body['entry'][0]
         changes = entry['changes'][0]
         value = changes['value']
+        
+        # Verificar si hay mensajes (puede ser una notificación de estado)
+        if 'messages' not in value or not value['messages']:
+            # Es una notificación de estado (leído, entregado, etc.), no procesar
+            return {"status": "EVENT_RECEIVED"}
+        
         message = value['messages'][0]
         number = message['from']
         # Formateo el numero de teléfono para no tener problema
@@ -66,24 +72,67 @@ async def received_message(request: Request):
         list_data = process_message(text, number)
         
         for item in list_data:
+            # Verifica si el mensaje necesita ser procesado con ChatGPT
+            needs_chatgpt = item.get("needs_chatgpt", False)
             
-            # Verifica el contenido del mensaje y de acuerdo a eso determina si usa el chatbot o no
-            if not item["type"]:  
-                responsegpt = chatgpt_service.get_bot_response(text)
-
-                if responsegpt != "error":
-                    data = text_message(responsegpt, number)
+            if needs_chatgpt:
+                # Construir el contexto de la consulta con el tema seleccionado
+                query_topic = item.get("query_topic", "")
+                user_query = text
+                if query_topic:
+                    # Agregar contexto del tema a la consulta
+                    contextual_query = f"Consulta sobre {query_topic}: {user_query}"
                 else:
-                    data = text_message("Ocurrio un error en el envió del mensaje", number)
-
-                whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
+                    contextual_query = user_query
                 
-                # Enviar mensaje adicional invitando a hacer más preguntas
-                follow_up_message = text_message("💡 Si mi respuesta no fue lo que esperabas o tienes más dudas, ¡no dudes en preguntarme! Estoy aquí para ayudarte con cualquier consulta sobre trámites de la facultad.", number)
-                whatsapp_service.send_message_whatsapp(follow_up_message, token_whatsapp, api_url)
-            else:
+                print(f"[Routes] Consulta contextual: {contextual_query}")
+                responsegpt = chatgpt_service.get_bot_response(contextual_query)
+                print(f"[Routes] Respuesta de ChatGPT: {responsegpt[:100] if responsegpt and responsegpt != 'error' else responsegpt}")
+
+                if responsegpt and responsegpt != "error" and len(responsegpt.strip()) > 0:
+                    # Enviar respuesta de ChatGPT
+                    data = text_message(responsegpt, number)
+                    result = whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
+                    print(f"Resultado de envío de respuesta ChatGPT: {result}")
+                    
+                    # Obtener el estado actual para preservar la opción seleccionada
+                    current_state = get_user_state(number)
+                    selected_option = current_state.get("selected_option") if current_state else None
+                    
+                    # Cambiar estado a "waiting_feedback" preservando la opción seleccionada
+                    set_user_state(number, "waiting_feedback", selected_option)
+                    
+                    # Mostrar botones de navegación
+                    try:
+                        navigation_buttons = show_navigation_buttons(number)
+                        print(f"Enviando botones de navegación: {len(navigation_buttons)} botones")
+                        for nav_item in navigation_buttons:
+                            if nav_item.get("data"):
+                                print(f"Enviando botón con data: {nav_item['data']}")
+                                result_btn = whatsapp_service.send_message_whatsapp(nav_item["data"], token_whatsapp, api_url)
+                                print(f"Resultado de envío de botones: {result_btn}")
+                            else:
+                                print("Error: nav_item no tiene data")
+                    except Exception as e:
+                        print(f"Error al enviar botones de navegación: {str(e)}")
+                        import traceback
+                        traceback.print_exc()
+                else:
+                    error_msg = "Ocurrió un error al procesar tu consulta. Por favor, intenta nuevamente o contacta con la secretaría."
+                    print(f"[Routes] Error: respuesta de ChatGPT inválida. Valor: {responsegpt}")
+                    data = text_message(error_msg, number)
+                    whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
+            elif item.get("type", False) and item.get("data"):
+                # Mensaje predefinido (menú, instrucciones, etc.)
                 whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
+            elif not item.get("type", True) and not needs_chatgpt:
+                # Mensaje que no se reconoce pero no necesita ChatGPT
+                if item.get("data"):
+                    whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
          
         return {"status": "EVENT_RECEIVED"}
-    except:
+    except Exception as e:
+        print(f"Error en received_message: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"status": "EVENT_RECEIVED"}

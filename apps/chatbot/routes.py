@@ -113,7 +113,7 @@ async def chat_with_bot_embeded(request: Request, user_message: str = Form(...))
         
         # Inicializar LLM y otros componentes necesarios
         llm_manager = LlmManager("openai")
-        llm = llm_manager.initialice_llm_model(api_key=api_key, model_name="gpt-3.5-turbo")
+        llm = llm_manager.initialice_llm_model(api_key=api_key, model_name="gpt-4o-mini")
         manager = EmbeddingsManager("openai", api_key, persist_directory)
         stored_embeddings = manager.get_embeddings()
         QA_chain = llm_manager.initialice_retriever(llm, stored_embeddings)

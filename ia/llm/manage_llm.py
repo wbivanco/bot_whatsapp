@@ -2,6 +2,7 @@ from typing import Any
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.schema import HumanMessage, SystemMessage
+from langchain.prompts import PromptTemplate
 
 class LlmManager:
     """ Clase que maneja la carga y configuración de modelos de lenguaje y conversación. """  
@@ -42,11 +43,41 @@ class LlmManager:
 
         retriever = stored_embeddings.as_retriever(search_type=search_type, search_kwargs={"k": num_result})
         
+        # Prompt template personalizado que fuerza al modelo a usar la información de los documentos
+        prompt_template = """Eres un asistente amigable y servicial para la Facultad de Humanidades de la Universidad Nacional de Catamarca.
+
+REGLAS CRÍTICAS:
+1. DEBES responder ÚNICAMENTE con la información que está en los siguientes documentos de contexto
+2. SIEMPRE responde en español argentino con tono cálido y amigable
+3. NUNCA digas "no sé", "no tengo información" o "no está en los documentos" sin haber analizado exhaustivamente el contexto
+4. Si la información no está exactamente en los documentos pero hay información relacionada, compártela de forma útil
+5. Si realmente no hay información relevante, ofrece ayuda con otros temas relacionados que sí tengas
+
+CONTEXTO (información de los documentos):
+{context}
+
+PREGUNTA DEL USUARIO: {question}
+
+INSTRUCCIONES:
+- Analiza cuidadosamente el contexto proporcionado
+- Extrae la información relevante para responder la pregunta
+- Si encuentras información relacionada aunque no sea exactamente lo que preguntan, compártela
+- Responde de forma clara, amigable y en español argentino
+- Si tu respuesta es completa, termínala ahí. Si crees que el usuario podría tener más dudas, agrega al final: "🤔 ¿Te queda alguna duda sobre este tema?"
+
+RESPUESTA:"""
+
+        PROMPT = PromptTemplate(
+            template=prompt_template,
+            input_variables=["context", "question"]
+        )
+        
         QA_chain = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
             retriever=retriever,
-            return_source_documents=True 
+            return_source_documents=True,
+            chain_type_kwargs={"prompt": PROMPT}
         )
 
         return QA_chain
@@ -107,31 +138,9 @@ DESPUÉS DE CADA RESPUESTA:
         return bot_response, sources
 
     def get_response_retriever_without_memory(self, QA_chain, user_message):
-        """ Recibe la cadena con el llm y retriever y la pregunta del usuario, devuelve solo la respuesta del bot. """
-        messages = [
-            SystemMessage(
-                content="""Eres un asistente para la Facultad de Humanidades de la Universidad Nacional de Catamarca.
-
-INSTRUCCIONES CRÍTICAS:
-1. SIEMPRE responde con información de los documentos proporcionados
-2. Si encuentras información relacionada, compártela aunque no sea exactamente lo que preguntan
-3. NUNCA digas "no tengo información" sin haber buscado exhaustivamente
-4. Busca por palabras clave, sinónimos y términos relacionados
-5. Responde en español argentino con tono amigable
-
-EJEMPLO: Si preguntan sobre "Práctica Docente", busca también "prácticas", "docente", "cursar", "materia", etc.
-
-IMPORTANTE: Siempre intenta encontrar información útil en los documentos antes de decir que no tienes la información.
-
-DESPUÉS DE CADA RESPUESTA:
-- Si tu respuesta es completa y clara, termina ahí
-- Si tu respuesta podría no ser suficiente o si crees que el usuario podría tener más dudas, agrega al final:
-  "¿Te queda alguna duda sobre este tema o necesitas información sobre algo más?"
-- Usa emojis para hacer la pregunta más amigable, por ejemplo: "🤔 ¿Te queda alguna duda sobre este tema o necesitas información sobre algo más?" """
-            )
-        ]
-        messages.append(HumanMessage(content=user_message))
-        response = QA_chain.invoke({"query": user_message, "messages": messages})
+        """ Recibe la cadena con el llm y retriever y la pregunta del usuario, devuelve solo la respuesta del bot. 
+        El prompt template personalizado ya está configurado en initialice_retriever, así que solo necesitamos pasar la query."""
+        response = QA_chain.invoke({"query": user_message})
         bot_response = response["result"]
     
         return bot_response
