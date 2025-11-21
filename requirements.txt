@@ -13,9 +13,11 @@ langchain
 langchain-openai
 langchain-community
 langchain-text-splitters
-python-dotenv
-itsdangerous
+langchain-core
 langchain-chroma
 chromadb
 pypdf
+python-dotenv
+itsdangerous
+python-docx
 pysqlite3-binary # Solo necesaria en Azure
