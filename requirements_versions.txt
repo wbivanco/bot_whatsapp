@@ -1,0 +1,57 @@
+# Requirements con versiones fijas para garantizar compatibilidad
+# Usar este archivo cuando se instale en un nuevo equipo para evitar problemas de compatibilidad
+
+# Core Framework
+fastapi==0.116.1
+uvicorn==0.35.0
+gunicorn
+starlette==0.47.3
+
+# Templates
+jinja2==3.1.6
+
+# Data Validation
+pydantic==2.11.7
+pydantic-core==2.33.2
+pydantic-settings==2.10.1
+
+# Form Handling
+python-multipart==0.0.20
+
+# Security
+bcrypt==4.3.0
+itsdangerous==2.2.0
+
+# HTTP Requests
+requests==2.32.5
+
+# Web Scraping
+beautifulsoup4==4.13.5
+
+# PDF Generation
+fpdf==1.7.2
+
+# LangChain (versiones fijas para compatibilidad - CRÍTICO)
+# Estas versiones evitan el error: ModuleNotFoundError: No module named 'langchain.chains'
+langchain==0.3.27
+langchain-core==0.3.75
+langchain-openai==0.3.32
+langchain-community==0.3.28
+langchain-text-splitters==0.3.9
+langchain-chroma==0.2.5
+
+# Vector Database
+chromadb==1.0.20
+
+# PDF Processing
+pypdf==6.0.0
+
+# Environment Variables
+python-dotenv==1.1.1
+
+# Document Processing
+python-docx
+
+# SQLite (solo necesaria en Azure)
+pysqlite3-binary
+
