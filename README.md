@@ -1,50 +1,81 @@
-# Inicia el servidor de local backend:
+Proyecto Backend – Webhooks WhatsApp + Scraper + Embeddings IA
 
-    uvicorn backend:app --reload
+Este proyecto implementa: - Un backend FastAPI. - Webhook para WhatsApp
+Cloud API. - Scraper para generar archivos automáticos. - Módulos de
+embeddings y vectorización. - Despliegue en Azure Web App (Python
+3.10). - Exposición local mediante Ngrok.
 
-# Correr el servidor de Ngrok en local, para disponer la app en internet con dominio propio(de prueba) y SSL
+------------------------------------------------------------------------
 
-    ngrok http --url=clearly-prime-eel.ngrok-free.app 8000
+🚀 Desarrollo local
 
-# URL a la web app de prueba de Azure, utilizada como URL de devolución de llamada del Webhook
+Iniciar el servidor FastAPI en local: uvicorn backend:app –reload
 
-    https://test-humanidades-wa.azurewebsites.net/bot_whatsapp/whatsapp
+Documentación local: http://127.0.0.1:8000/docs
 
-# URL a la web app de prueba local, utilizada como URL de devolución de llamada del Webhook
+------------------------------------------------------------------------
 
-    https://clearly-prime-eel.ngrok-free.app/bot_whatsapp/whatsapp
+🌐 Exponer en Internet mediante Ngrok (modo pruebas)
 
-# Para desplegar en Azure hacer los siguientes cambios:
----
-Esto es necesario porque el servidor Azure es en GNU/Linux y tiene la versión de Python (3.10)
-que tiene problemas con la versión de la librería de Chroma.
+    ngrok http --url=TU-URL.ngrok-free.app 8000
 
-- En la web app de Azure, tener seteado las siguientes secciones del menú:
+Ejemplo: ngrok http –url=clearly-prime-eel.ngrok-free.app 8000
 
-  - variables de entorno
-    SCM_DO_BUILD_DURING_DEPLOYMENT = true
-  - configuración -> comando de inicio
-    python -m uvicorn backend:app --host 0.0.0.0 --port 8000
-    # gunicorn -k uvicorn.workers.UvicornWorker backend:app (versión anterior)
+Webhook local:
+https://clearly-prime-eel.ngrok-free.app/bot_whatsapp/whatsapp
 
-- Descomentar en requirements.txt la linea de:
-  pysqlite3-binary
+------------------------------------------------------------------------
 
-- Descomentar en ia/embeddings/manage_embeddings.py las siguientes líneas(son las primeras):
-  **import**('pysqlite3')
-  import sys
-  sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+☁️ Webhook en Azure (producción)
+https://test-humanidades-wa.azurewebsites.net/bot_whatsapp/whatsapp
 
-# Video donde muestra como hacer para registrar el número de teléfono 
+------------------------------------------------------------------------
 
-  https://www.youtube.com/watch?v=4eUwiK1C4JI
+🟦 Despliegue en Azure – INSTRUCCIONES CORRECTAS
 
+Eliminar las siguientes variables si existen:
+
+SCM_DO_BUILD_DURING_DEPLOYMENT 
+SCM_RUN_FROM_PACKAGE
+WEBSITE_RUN_FROM_PACKAGE 
+WEBSITE_RUN_FROM_ZIP
+
+Startup Command: python -m uvicorn backend:app –host 0.0.0.0 –port 8000
+
+------------------------------------------------------------------------
+
+Compatibilidad Python 3.10 + Chroma
+
+En requirements.txt descomentar: pysqlite3-binary
+
+En ia/embeddings/manage_embeddings.py descomentar: 
+import pysqlite3
+import sys 
+sys.modules[‘sqlite3’] = sys.modules.pop(‘pysqlite3’)
+
+------------------------------------------------------------------------
+
+Desplegar desde VS Code:
+
+1.  Abrir carpeta raíz del proyecto.
+2.  Deploy to Web App.
+3.  Cuando pregunte “run build commands on target server”: responder NO.
+
+------------------------------------------------------------------------
+
+Verificación en Kudu: ls -l /home/site/wwwroot
+
+Debe aparecer backend.py, requirements.txt, apps/, ia/, db/, files/,
+etc.
+
+Probar: https://TU-APP.azurewebsites.net/docs
+
+------------------------------------------------------------------------
 # Para generar los distintos archivos con el scraper hay que pasar los valores en el body:
+🛠️ Endpoint del Scraper
 
----
+POST → http://127.0.0.1:8000/scraper/generate_pd
 
-Método: POST
-URL: 127.0.0.1:8000/scraper/generate_pd
 BODY(raw):
 {
 "files": [
@@ -68,3 +99,12 @@ BODY(raw):
 }
  ]
 }
+
+------------------------------------------------------------------------
+# Video donde muestra como hacer para registrar el número de teléfono 
+🎥 Video útil: https://www.youtube.com/watch?v=4eUwiK1C4JI
+
+------------------------------------------------------------------------
+
+Autor: Proyecto backend para la Facultad de Humanidades – UNCa
+Desarrollado por Walter Bivanco (Inapsis)
