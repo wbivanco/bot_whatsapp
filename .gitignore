@@ -48,5 +48,8 @@ ENV/
 env.bak/
 venv.bak/
 .env
-uploads/
-dbchroma/
+
+# Los documentos y la BD vectorial SÍ se suben al repositorio
+# para mantener integridad referencial completa
+# files/uploads/ - documentos de la base de conocimiento
+# db/dbchroma/ - base de datos vectorial de embeddings

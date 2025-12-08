@@ -71,6 +71,47 @@ etc.
 Probar: https://TU-APP.azurewebsites.net/docs
 
 ------------------------------------------------------------------------
+
+📥 Descargar documentos desde Azure
+
+**Opción 1: Kudu (Más fácil)**
+1. Ve a: `https://TU-APP.scm.azurewebsites.net`
+2. O desde Azure Portal: App Service → "Advanced Tools" → "Go"
+3. Navega a `site/wwwroot/files/uploads/` y `site/wwwroot/db/dbchroma/`
+4. Selecciona y descarga los archivos
+
+**Opción 2: SSH desde Azure Portal**
+1. App Service → "SSH" o "Herramientas de desarrollo" → "SSH"
+2. Ejecuta: `cd /home/site/wwwroot && ls -la files/uploads/ db/dbchroma/`
+3. Usa Kudu para descargar los archivos
+
+------------------------------------------------------------------------
+
+📁 Ubicación de los documentos
+
+Los documentos se guardan en las siguientes carpetas (relativas a la raíz del proyecto):
+
+1. Archivos subidos manualmente (PDFs, DOCX, TXT):
+   - Local: `files/uploads/`
+   - Azure: `/home/site/wwwroot/files/uploads/`
+   - Variable de entorno: `PATH_TO_UPLOAD_FOLDER = 'files/uploads'`
+
+2. PDFs generados por el scraper:
+   - Local: `files/uploads/` (mismo directorio que los archivos subidos)
+   - Azure: `/home/site/wwwroot/files/uploads/`
+
+3. Base de datos de embeddings (Chroma):
+   - Local: `db/dbchroma/`
+   - Azure: `/home/site/wwwroot/db/dbchroma/`
+   - Variable de entorno: `PERSIST_CHROMADB_FOLDER = 'db/dbchroma'`
+
+**Nota importante sobre el repositorio:**
+- Los documentos en `files/uploads/` **SÍ se suben al repositorio** para mantener integridad referencial
+- La base de datos de embeddings (`db/dbchroma/`) **TAMBIÉN se sube** al repositorio para mantener integridad completa
+- Cada cambio en `files/uploads/` actualiza automáticamente la BD vectorial mediante el CRUD de administración
+- Ambos deben estar sincronizados en el repositorio para mantener la integridad referencial
+
+------------------------------------------------------------------------
 # Para generar los distintos archivos con el scraper hay que pasar los valores en el body:
 🛠️ Endpoint del Scraper
 
