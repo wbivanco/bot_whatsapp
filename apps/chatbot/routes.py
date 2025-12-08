@@ -82,7 +82,7 @@ async def chat_with_bot(request: Request, user_message: str = Form(...)):
         llm = llm_manager.initialice_llm_model(api_key=api_key, model_name="gpt-4-turbo")
         manager = EmbeddingsManager("openai", api_key, persist_directory)
         stored_embeddings = manager.get_embeddings()
-        QA_chain = llm_manager.initialice_retriever(llm, stored_embeddings)
+        QA_chain = llm_manager.initialice_retriever(llm, stored_embeddings, num_result=10)
 
         # Obtener la respuesta del chatbot
         bot_response, sources = llm_manager.get_response_retriever(QA_chain, user_message, session_history)
@@ -116,7 +116,7 @@ async def chat_with_bot_embeded(request: Request, user_message: str = Form(...))
         llm = llm_manager.initialice_llm_model(api_key=api_key, model_name="gpt-4o-mini")
         manager = EmbeddingsManager("openai", api_key, persist_directory)
         stored_embeddings = manager.get_embeddings()
-        QA_chain = llm_manager.initialice_retriever(llm, stored_embeddings)
+        QA_chain = llm_manager.initialice_retriever(llm, stored_embeddings, num_result=10)
         
         # Obtener la respuesta del chatbot
         bot_response, sources = llm_manager.get_response_retriever(QA_chain, user_message, session_history)

@@ -59,7 +59,35 @@ Desplegar desde VS Code:
 
 1.  Abrir carpeta raíz del proyecto.
 2.  Deploy to Web App.
-3.  Cuando pregunte “run build commands on target server”: responder NO.
+3.  Cuando pregunte "run build commands on target server": responder NO.
+
+------------------------------------------------------------------------
+
+🚀 CI/CD con GitHub Actions (Despliegue Automático)
+
+El proyecto incluye un workflow de GitHub Actions que despliega automáticamente a Azure cuando se hace push a la rama `main`.
+
+**Configuración inicial (solo una vez):**
+
+1. **Obtener el Publish Profile:**
+   - En Azure Portal, ve a tu App Service → Overview
+   - Haz clic en "Get publish profile" (Obtener perfil de publicación)
+   - Se descargará un archivo `.PublishSettings`
+
+2. **Configurar el Secret en GitHub:**
+   - Ve a: `https://github.com/wbivanco/bot_whatsapp/settings/secrets/actions`
+   - Haz clic en "New repository secret"
+   - **Name:** `AZURE_WEBAPP_PUBLISH_PROFILE`
+   - **Secret:** Abre el archivo `.PublishSettings` descargado y copia TODO su contenido (desde `<publishData>` hasta `</publishData>`)
+   - Haz clic en "Add secret"
+
+3. **Probar el despliegue:**
+   - Haz un commit y push a `main` → se desplegará automáticamente
+   - O ejecuta manualmente: Actions → "Deploy to Azure App Service" → Run workflow
+
+**Nota:** El workflow despliega todo el código incluyendo documentos y BD vectorial, manteniendo la integridad referencial.
+
+**Archivo de configuración:** `.github/workflows/azure-deploy.yml`
 
 ------------------------------------------------------------------------
 

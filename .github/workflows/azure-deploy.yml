@@ -1,0 +1,41 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Permite ejecutar manualmente desde GitHub
+
+env:
+  AZURE_WEBAPP_NAME: test-humanidades-wa
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Verificar estructura del proyecto
+      run: |
+        echo "Verificando archivos del proyecto..."
+        ls -la
+        echo "Verificando backend.py..."
+        test -f backend.py && echo "✓ backend.py encontrado" || echo "✗ backend.py no encontrado"
+        echo "Verificando requirements.txt..."
+        test -f requirements.txt && echo "✓ requirements.txt encontrado" || echo "✗ requirements.txt no encontrado"
+
+    - name: Desplegar a Azure App Service
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: .
+
