@@ -25,7 +25,9 @@ load_env()
 api_key = os.getenv("OPENAI_API_KEY")
 persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 upload_directory = os.getenv("PATH_TO_UPLOAD_FOLDER")
-file_types = os.getenv("FILES_TYPES")       
+# Convertir FILES_TYPES de string separado por comas a lista
+file_types_str = os.getenv("FILES_TYPES", ".pdf,.docx,.txt")
+file_types = [ft.strip() for ft in file_types_str.split(",")] if file_types_str else [".pdf", ".docx", ".txt"]       
 
 def create_embeddings():
     """
@@ -33,7 +35,7 @@ def create_embeddings():
 
     Args:
         upload_directory (str): Ruta al directorio de uploads.
-        file_types (str): Tipos de archivo permitidos.
+        file_types (list): Lista de tipos de archivo permitidos (ej: ['.pdf', '.docx', '.txt']).
         api_key (str): API key para el gestor de embeddings.
         persist_directory (str): Ruta al directorio donde se guardan los embeddings.
 
