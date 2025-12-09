@@ -29,7 +29,7 @@ def catamarca_phone_number_formateator(number):
 
 @router.get("/hola")
 async def hello():
-    return {"message": "Bienvenido al Bot de la Facultad de Humanidades de la UNCa."}
+    return {"message": "Bienvenido/a al Bot de la Facultad de Humanidades de la UNCa."}
 
 @router.get("/whatsapp")
 async def verify_token(request: Request):

@@ -40,7 +40,7 @@ def get_bot_response(user_message):
             llm, 
             stored_embeddings,
             search_type="similarity",
-            num_result=3  # Aumentar el número de resultados para mejor cobertura
+            num_result=10  # Aumentar a 10 resultados para mejor cobertura y encontrar información específica
         )
         
         if QA_chain is None:
@@ -51,7 +51,7 @@ def get_bot_response(user_message):
         
         # Debug: ver qué documentos se recuperan
         print(f"[ChatGPT Service] Consulta del usuario: {user_message}")
-        retriever = stored_embeddings.as_retriever(search_type="similarity", search_kwargs={"k": 3})
+        retriever = stored_embeddings.as_retriever(search_type="similarity", search_kwargs={"k": 10})
         docs = retriever.get_relevant_documents(user_message)
         print(f"[ChatGPT Service] Documentos recuperados: {len(docs)}")
         for i, doc in enumerate(docs):
