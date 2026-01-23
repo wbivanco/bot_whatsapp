@@ -19,7 +19,7 @@ Documentación local: http://127.0.0.1:8000/docs
 
     ngrok http --url=TU-URL.ngrok-free.app 8000
 
-Ejemplo: ngrok http –url=clearly-prime-eel.ngrok-free.app 8000
+Ejemplo: ngrok http --url=clearly-prime-eel.ngrok-free.app 8000
 
 Webhook local:
 https://clearly-prime-eel.ngrok-free.app/bot_whatsapp/whatsapp
