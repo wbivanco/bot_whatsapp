@@ -18,14 +18,24 @@ load_env()
 token_whatsapp = os.getenv("TOKEN_WHATSAPP")
 api_url = os.getenv("API_URL")
 
-def catamarca_phone_number_formateator(number):
-    """ Formatea el número de teléfono de Catamarca, esto evita el error de que no llega el mensaje."""
-    # Eliminar el tercer carácter
-    number_temp = number[:2] + number[3:]
-    # Insertar '15' entre el quinto y sexto carácter
-    final_number = number_temp[:5] + '15' + number_temp[5:]
-    
-    return final_number
+# Código anterior - Formateo específico para números de Catamarca (comentado)
+# def catamarca_phone_number_formateator(number):
+#     """ Formatea el número de teléfono de Catamarca, esto evita el error de que no llega el mensaje."""
+#     # Eliminar el tercer carácter
+#     number_temp = number[:2] + number[3:]
+#     # Insertar '15' entre el quinto y sexto carácter
+#     final_number = number_temp[:5] + '15' + number_temp[5:]
+#     
+#     return final_number
+
+def normalize_phone_number(number):
+    """ Normaliza el número de teléfono para asegurar que esté en formato válido.
+    WhatsApp envía los números en formato internacional (código de país + número).
+    Esta función solo limpia el número de espacios y caracteres especiales si los hay.
+    """
+    # Remover espacios, guiones y otros caracteres no numéricos
+    normalized = ''.join(filter(str.isdigit, number))
+    return normalized
 
 @router.get("/hola")
 async def hello():
@@ -62,8 +72,11 @@ async def received_message(request: Request):
         
         message = value['messages'][0]
         number = message['from']
-        # Formateo el numero de teléfono para no tener problema
-        number = catamarca_phone_number_formateator(number)
+        # Normalizo el número de teléfono (limpia espacios y caracteres especiales)
+        # WhatsApp ya envía los números en formato internacional correcto
+        number = normalize_phone_number(number)
+        # Código anterior comentado (formateo específico de Catamarca):
+        # number = catamarca_phone_number_formateator(number)
         
         # Verifica el tipo de mensaje que se recibe, si es texto o interactivo y retorna el texto.
         text = get_text_user(message)    
