@@ -49,7 +49,6 @@ env.bak/
 venv.bak/
 .env
 
-# Los documentos y la BD vectorial SÍ se suben al repositorio
-# para mantener integridad referencial completa
-# files/uploads/ - documentos de la base de conocimiento
-# db/dbchroma/ - base de datos vectorial de embeddings
+# Documentos y BD vectorial: NO agregar a .gitignore — se versionan y van en el zip de deploy (GitHub Actions → Azure).
+# files/uploads/  — base de conocimiento
+# db/dbchroma/    — Chroma persistido (regenerar y commitear tras cambiar documentos)

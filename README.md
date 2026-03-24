@@ -85,7 +85,16 @@ El proyecto incluye un workflow de GitHub Actions que despliega automáticamente
    - Haz un commit y push a `main` → se desplegará automáticamente
    - O ejecuta manualmente: Actions → "Deploy to Azure App Service" → Run workflow
 
-**Nota:** El workflow despliega todo el código incluyendo documentos y BD vectorial, manteniendo la integridad referencial.
+**Nota:** El workflow despliega **todo el repositorio** tal como está en Git (`package: .`): código, `files/uploads/` y `db/dbchroma/` **solo si están commiteados**. No están en `.gitignore`.
+
+**Flujo recomendado (proyecto pequeño, conocimiento versionado):**
+
+1. Subí o actualizá PDF/DOCX/TXT desde el panel (o copiá en `files/uploads/`).
+2. Generá embeddings (panel o `GET /chatbot/generate_embeddings/` con la app en marcha).
+3. Commiteá y pusheá **ambos**: `files/uploads/` y `db/dbchroma/` (incluye `chroma.sqlite3` y subcarpetas de la colección).
+4. El push a `main` dispara el deploy; en los logs de Actions verás el paso *Conocimiento y Chroma en el paquete de deploy* con el conteo de archivos.
+
+Si esas carpetas no aparecen en el checkout del Action, en Azure el bot arrancará sin documentos indexados hasta que vuelvas a subir archivos y regenerés embeddings **en el servidor** o hagas un nuevo commit con los datos.
 
 **Archivo de configuración:** `.github/workflows/azure-deploy.yml`
 
