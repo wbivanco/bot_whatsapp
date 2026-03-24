@@ -4,6 +4,33 @@ from langchain.chains import RetrievalQA
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.prompts import PromptTemplate
 
+RAG_STUFF_PROMPT = PromptTemplate(
+    template="""Eres un asistente amigable y servicial para la Facultad de Humanidades de la Universidad Nacional de Catamarca.
+
+REGLAS CRÍTICAS:
+1. DEBES responder ÚNICAMENTE con la información que está en los siguientes documentos de contexto
+2. SIEMPRE responde en español argentino con tono cálido y amigable
+3. NUNCA digas "no sé", "no tengo información" o "no está en los documentos" sin haber analizado exhaustivamente el contexto
+4. Si la información no está exactamente en los documentos pero hay información relacionada, compártela de forma útil
+5. Si realmente no hay información relevante, ofrece ayuda con otros temas relacionados que sí tengas
+
+CONTEXTO (información de los documentos):
+{context}
+
+PREGUNTA DEL USUARIO: {question}
+
+INSTRUCCIONES:
+- Analiza cuidadosamente el contexto proporcionado
+- Extrae la información relevante para responder la pregunta
+- Si encuentras información relacionada aunque no sea exactamente lo que preguntan, compártela
+- Responde de forma clara, amigable y en español argentino
+- Si tu respuesta es completa, termínala ahí. Si crees que el usuario podría tener más dudas, agrega al final: "🤔 ¿Te queda alguna duda sobre este tema?"
+
+RESPUESTA:""",
+    input_variables=["context", "question"],
+)
+
+
 class LlmManager:
     """ Clase que maneja la carga y configuración de modelos de lenguaje y conversación. """  
     def __init__(self, llm_provider) -> None:
@@ -43,44 +70,21 @@ class LlmManager:
 
         retriever = stored_embeddings.as_retriever(search_type=search_type, search_kwargs={"k": num_result})
         
-        # Prompt template personalizado que fuerza al modelo a usar la información de los documentos
-        prompt_template = """Eres un asistente amigable y servicial para la Facultad de Humanidades de la Universidad Nacional de Catamarca.
-
-REGLAS CRÍTICAS:
-1. DEBES responder ÚNICAMENTE con la información que está en los siguientes documentos de contexto
-2. SIEMPRE responde en español argentino con tono cálido y amigable
-3. NUNCA digas "no sé", "no tengo información" o "no está en los documentos" sin haber analizado exhaustivamente el contexto
-4. Si la información no está exactamente en los documentos pero hay información relacionada, compártela de forma útil
-5. Si realmente no hay información relevante, ofrece ayuda con otros temas relacionados que sí tengas
-
-CONTEXTO (información de los documentos):
-{context}
-
-PREGUNTA DEL USUARIO: {question}
-
-INSTRUCCIONES:
-- Analiza cuidadosamente el contexto proporcionado
-- Extrae la información relevante para responder la pregunta
-- Si encuentras información relacionada aunque no sea exactamente lo que preguntan, compártela
-- Responde de forma clara, amigable y en español argentino
-- Si tu respuesta es completa, termínala ahí. Si crees que el usuario podría tener más dudas, agrega al final: "🤔 ¿Te queda alguna duda sobre este tema?"
-
-RESPUESTA:"""
-
-        PROMPT = PromptTemplate(
-            template=prompt_template,
-            input_variables=["context", "question"]
-        )
-        
         QA_chain = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
             retriever=retriever,
             return_source_documents=True,
-            chain_type_kwargs={"prompt": PROMPT}
+            chain_type_kwargs={"prompt": RAG_STUFF_PROMPT},
         )
 
         return QA_chain
+
+    def answer_rag_stuff(self, llm, context: str, question: str) -> str:
+        """Responde con el mismo prompt que RetrievalQA stuff, sin volver a ejecutar el retriever."""
+        chain = RAG_STUFF_PROMPT | llm
+        out = chain.invoke({"context": context or "(sin documentos recuperados)", "question": question})
+        return out.content if getattr(out, "content", None) else str(out)
 
     def get_response_retriever(self, QA_chain, user_message, history):
         """ Recibe la cadena con el llm y retriever, además de la pregunta del usuario y el historial del chat, devuelve \

@@ -66,7 +66,7 @@ def get_option_name(option_id):
 
 def show_main_menu(number):
     """Muestra el menú principal."""
-    data = mf.text_message("¡Hola! 👋 Soy HumaChat, el asistente virtual de la Facultad de Humanidades de la UNCa. Estoy acá para ayudarte con tus consultas sobre trámites, fechas importantes, materias y todo lo que necesites de la facu 😊💬", number)
+    data = mf.text_message("¡Hola! 👋 Soy HumaBot, el asistente virtual de la Facultad de Humanidades de la UNCa. Estoy acá para ayudarte con tus consultas sobre trámites, fechas importantes, materias y todo lo que necesites de la facu 😊💬", number)
     sections = [
         {
             "title": "HumaChat",

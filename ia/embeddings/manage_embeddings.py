@@ -1,6 +1,9 @@
-import pysqlite3
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# import pysqlite3
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+import os
+import shutil
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -40,16 +43,65 @@ class EmbeddingsManager:
 
         return embeddings_model
 
-    def save_embeddings(self, upload_directory, file_types):
-        """ Guarda los embeddings generados en una BD vectorial. """ 
+    def clear_embeddings(self) -> None:
+        """Elimina la colección persistida. Útil cuando no quedan documentos indexables."""
+        if not self.persist_directory:
+            return
+        if os.path.isdir(self.persist_directory):
+            shutil.rmtree(self.persist_directory)
+        os.makedirs(self.persist_directory, exist_ok=True)
+
+    def save_embeddings(self, upload_directory, file_types) -> bool:
+        """ Guarda los embeddings generados en una BD vectorial.
+        Returns:
+            True si se indexó al menos un fragmento; False si no había nada indexable (se vacía la BD).
+        """
         document_chunks = Utils.load_chunked_documents(upload_directory, file_types)
         embeddings_model = EmbeddingsWrapper(self.embeddings_model)
-        
+
+        if not document_chunks:
+            self.clear_embeddings()
+            return False
+
+        # Reemplazar el índice completo según el contenido actual de uploads (evita duplicados y estados viejos).
+        self.clear_embeddings()
+
         Chroma.from_documents(
             documents=document_chunks, 
             embedding=embeddings_model, 
             persist_directory=self.persist_directory
-        ) 
+        )
+        return True
+
+    def delete_vectors_for_source(self, source_filename: str) -> int:
+        """Elimina de Chroma los vectores cuyo metadato ``source`` es el nombre del archivo (como al indexar)."""
+        source = os.path.basename(source_filename)
+        if not source or not self.persist_directory or not os.path.isdir(self.persist_directory):
+            return 0
+        try:
+            if not any(os.scandir(self.persist_directory)):
+                return 0
+        except OSError:
+            return 0
+        if not self.embeddings_model:
+            return 0
+
+        wrapper = EmbeddingsWrapper(self.embeddings_model)
+        vs = Chroma(
+            embedding_function=wrapper,
+            persist_directory=self.persist_directory,
+        )
+
+        def _ids_for_where(where: dict):
+            out = vs.get(where=where)
+            return out.get("ids") or []
+
+        ids = _ids_for_where({"source": source})
+        if not ids:
+            ids = _ids_for_where({"source": {"$eq": source}})
+        if ids:
+            vs.delete(ids=ids)
+        return len(ids)
 
     def get_embeddings(self):
         """ Obtiene los embeddings generados. """              

@@ -7,14 +7,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
 from base.load_env import load_env
+
+load_env()
+
 from apps.chatbot.routes import router as chatbot_router
 from apps.file_management.routes import router as file_management_router
 from apps.whatsapp.routes import router as whatsapp_router
 from apps.scraper.routes import router as scraper_router
 from apps.login.routes import router as login_router
 from apps.backoffice.routes import router as backoffice_router
-
-load_env()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 upload_directory = os.getenv("PATH_TO_UPLOAD_FOLDER")

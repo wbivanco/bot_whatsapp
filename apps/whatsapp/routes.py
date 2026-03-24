@@ -99,7 +99,10 @@ async def received_message(request: Request):
                     contextual_query = user_query
                 
                 print(f"[Routes] Consulta contextual: {contextual_query}")
-                responsegpt = chatgpt_service.get_bot_response(contextual_query)
+                # La búsqueda vectorial va con el texto del usuario; el prefijo del menú puede empeorar el embedding.
+                responsegpt = chatgpt_service.get_bot_response(
+                    contextual_query, retrieval_query=user_query
+                )
                 print(f"[Routes] Respuesta de ChatGPT: {responsegpt[:100] if responsegpt and responsegpt != 'error' else responsegpt}")
 
                 if responsegpt and responsegpt != "error" and len(responsegpt.strip()) > 0:

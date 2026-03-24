@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from ia.llm.manage_llm import LlmManager
 from ia.embeddings.manage_embeddings import EmbeddingsManager
@@ -9,10 +10,17 @@ load_env()
 api_key = os.getenv("OPENAI_API_KEY")
 persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 
-def get_bot_response(user_message):
-    """ Obtiene la respuesta del bot (utilizando su base de conocimiento) a partir del mensaje del usuario. """
+def get_bot_response(llm_query: str, retrieval_query: Optional[str] = None):
+    """Obtiene la respuesta del bot usando RAG.
+
+    Args:
+        llm_query: Texto que ve el modelo (puede incluir contexto del menú).
+        retrieval_query: Texto usado solo para búsqueda vectorial; si es None, se usa llm_query.
+    """
+    r_query = (retrieval_query if retrieval_query is not None else llm_query).strip()
     try:
-        print(f"[ChatGPT Service] Procesando consulta: {user_message}")
+        print(f"[ChatGPT Service] Procesando consulta (LLM): {llm_query}")
+        print(f"[ChatGPT Service] Búsqueda vectorial con: {r_query!r}")
         
         llm_manager = LlmManager("openai")
         llm = llm_manager.initialice_llm_model(
@@ -36,29 +44,33 @@ def get_bot_response(user_message):
         
         print("[ChatGPT Service] Embeddings cargados correctamente")
         
-        QA_chain = llm_manager.initialice_retriever(
-            llm, 
-            stored_embeddings,
-            search_type="similarity",
-            num_result=10  # Aumentar a 10 resultados para mejor cobertura y encontrar información específica
+        try:
+            n_stored = stored_embeddings._collection.count()
+        except Exception as exc:
+            n_stored = -1
+            print(f"[ChatGPT Service] No se pudo leer el conteo de Chroma: {exc}")
+        print(f"[ChatGPT Service] Registros en colección Chroma: {n_stored}")
+        if n_stored == 0:
+            print(
+                "[ChatGPT Service] La colección vectorial está vacía. "
+                "Subí documentos desde el panel y generá embeddings; en Azure el disco local suele no persistir entre reinicios "
+                "salvo que uses almacenamiento persistente o vuelvas a generar índice en el servidor."
+            )
+
+        retriever = stored_embeddings.as_retriever(
+            search_type="similarity", search_kwargs={"k": 10}
         )
-        
-        if QA_chain is None:
-            print("[ChatGPT Service] Error: No se pudo inicializar el QA_chain")
-            return "error"
-        
-        print("[ChatGPT Service] QA_chain inicializado, obteniendo respuesta...")
-        
-        # Debug: ver qué documentos se recuperan
-        print(f"[ChatGPT Service] Consulta del usuario: {user_message}")
-        retriever = stored_embeddings.as_retriever(search_type="similarity", search_kwargs={"k": 10})
-        docs = retriever.get_relevant_documents(user_message)
+        docs = retriever.invoke(r_query)
         print(f"[ChatGPT Service] Documentos recuperados: {len(docs)}")
         for i, doc in enumerate(docs):
             print(f"[ChatGPT Service] Doc {i+1}: {doc.metadata.get('source', 'Sin fuente')}")
-            print(f"[ChatGPT Service] Contenido: {doc.page_content[:200]}...")
-        
-        bot_response = llm_manager.get_response_retriever_without_memory(QA_chain, user_message)
+            preview = (doc.page_content or "")[:200]
+            print(f"[ChatGPT Service] Contenido: {preview}...")
+
+        context = "\n\n".join(
+            d.page_content for d in docs if d.page_content and d.page_content.strip()
+        )
+        bot_response = llm_manager.answer_rag_stuff(llm, context, llm_query)
         
         if bot_response is None or bot_response == "":
             print("[ChatGPT Service] Error: La respuesta del bot está vacía")

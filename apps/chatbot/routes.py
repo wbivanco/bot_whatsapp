@@ -43,14 +43,20 @@ def create_embeddings():
         dict: Estado del proceso.
     """
 
-    # Verificar que existan archivos en el directorio de uploads, para que no de error el generador de embeddings
-    if not os.listdir(upload_directory):
-        raise HTTPException(status_code=400, detail="No hay archivos en el directorio de uploads")
+    if not os.path.exists(upload_directory):
+        os.makedirs(upload_directory, exist_ok=True)
 
     try:
         manager = EmbeddingsManager("openai", api_key, persist_directory)
-        manager.save_embeddings(upload_directory, file_types)
-        return {"status": "Embeddings generados correctamente"}
+        # Sin archivos o solo tipos no indexables: vaciar Chroma (evita upsert con lista vacía).
+        if not os.listdir(upload_directory):
+            manager.clear_embeddings()
+            return {"status": "Embeddings actualizados (sin documentos en uploads)."}
+        if manager.save_embeddings(upload_directory, file_types):
+            return {"status": "Embeddings generados correctamente"}
+        return {
+            "status": "Embeddings vaciados: en uploads no hay archivos .pdf, .docx o .txt indexables.",
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     

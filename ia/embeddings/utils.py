@@ -1,7 +1,35 @@
-import os 
+import os
 
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
+from docx import Document as DocxReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_core.documents import Document as LCDocument
+
+
+class DocxPythonLoader:
+    """Carga .docx con python-docx (sin dependencia ``unstructured``)."""
+
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def load(self):
+        doc = DocxReader(self.file_path)
+        parts = []
+        for p in doc.paragraphs:
+            t = (p.text or "").strip()
+            if t:
+                parts.append(t)
+        for table in doc.tables:
+            rows = []
+            for row in table.rows:
+                cells = " | ".join((c.text or "").strip() for c in row.cells)
+                if cells.strip():
+                    rows.append(cells)
+            if rows:
+                parts.append("\n".join(rows))
+        body = "\n\n".join(parts)
+        return [LCDocument(page_content=body, metadata={})]
+
 
 class Utils:
     @staticmethod
@@ -22,23 +50,30 @@ class Utils:
         extensiones permitidas pasadas como parámetro. """                
         loader_mapping = {
             ".pdf": PyPDFLoader,
-            ".docx": UnstructuredWordDocumentLoader,
-            ".txt": TextLoader
+            ".docx": DocxPythonLoader,
+            ".txt": TextLoader,
         }
 
         documents = []
+        allowed = {ext.lower() for ext in file_types}
         for filename in os.listdir(upload_directory):
-            file_path = os.path.join(upload_directory, filename)     
-            file_extension = os.path.splitext(filename)[1]
+            file_path = os.path.join(upload_directory, filename)
+            file_extension = os.path.splitext(filename)[1].lower()
 
-            if file_extension in file_types:
+            if file_extension in allowed:
                 loader_class = loader_mapping.get(file_extension)
                 if loader_class:
                     loader = loader_class(file_path)
                     documento = loader.load()
-                    
+
                     for doc in documento:
-                        doc.metadata['source'] = filename
+                        doc.metadata["source"] = filename
+                    total_text = sum(len((d.page_content or "").strip()) for d in documento)
+                    if total_text == 0:
+                        print(
+                            f"[Embeddings] Advertencia: '{filename}' no aportó texto extraíble "
+                            f"(PDF escaneado/imagen u otro formato sin capa de texto). No se indexará contenido útil."
+                        )
                     document_chunks = Utils.generate_chunks(documento)
                     documents.extend(document_chunks)
                 else:

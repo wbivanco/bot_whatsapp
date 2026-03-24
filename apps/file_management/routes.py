@@ -7,11 +7,14 @@ from base.load_env import load_env
 from base.sessions import require_session
 
 from apps.chatbot.routes import create_embeddings
+from ia.embeddings.manage_embeddings import EmbeddingsManager
 
 router = APIRouter()
 
 load_env()
 upload_directory = os.getenv("PATH_TO_UPLOAD_FOLDER")
+api_key = os.getenv("OPENAI_API_KEY")
+persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 
 templates = Jinja2Templates(directory=["shared_templates", "apps/backoffice/templates", "apps/file_management/templates", "apps/chatbot/templates"])
 
@@ -31,13 +34,28 @@ async def list_files(request: Request):
 
 @router.post("/delete/")
 def delete_file(request: Request, filename: str = Form(...)):  
-    """ Eliminar un archivo de la base de conocimiento y actualiza embeddings."""
-    file_path = os.path.join(upload_directory, filename)
-    
+    """Elimina el archivo en disco y los vectores asociados en Chroma (metadato source)."""
+    safe_name = os.path.basename(filename)
+    file_path = os.path.join(upload_directory, safe_name)
+
     if os.path.exists(file_path):
         os.remove(file_path)
-        create_embeddings()
-        request.session["message"] = f"Archivo '{filename}' eliminado exitosamente. Actualización correcta de la base de conocimiento."    
+        try:
+            manager = EmbeddingsManager("openai", api_key, persist_directory)
+            removed = manager.delete_vectors_for_source(safe_name)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Archivo eliminado pero falló la actualización de la BD vectorial: {e}",
+            ) from e
+        if removed:
+            extra = f"Se quitaron {removed} fragmento(s) de la base vectorial."
+        else:
+            extra = (
+                "No se encontraron vectores con ese nombre en Chroma "
+                "(p. ej. el archivo no estaba indexado o el metadato source no coincide)."
+            )
+        request.session["message"] = f"Archivo '{safe_name}' eliminado. {extra}"
         return RedirectResponse("/files/list_files", status_code=303)
     else:
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
