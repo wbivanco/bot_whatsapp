@@ -18,6 +18,18 @@ persist_directory = os.getenv("PERSIST_CHROMADB_FOLDER")
 
 templates = Jinja2Templates(directory=["shared_templates", "apps/backoffice/templates", "apps/file_management/templates", "apps/chatbot/templates"])
 
+
+def _list_visible_upload_files(directory: str) -> list:
+    """Nombres de archivo para el panel: sin metadatos de Git (.gitkeep) ni otros ocultos."""
+    if not os.path.isdir(directory):
+        return []
+    return sorted(
+        f
+        for f in os.listdir(directory)
+        if not f.startswith(".")
+    )
+
+
 @router.get("/list_files", response_class=HTMLResponse)
 async def list_files(request: Request): 
     """ Listar los archivos que formaran parte de la base de conocimiento."""
@@ -28,7 +40,7 @@ async def list_files(request: Request):
     
     if not os.path.exists(upload_directory):
         os.makedirs(upload_directory, exist_ok=True)        
-    files = os.listdir(upload_directory)
+    files = _list_visible_upload_files(upload_directory)
     message = request.session.pop("message", None)
     return templates.TemplateResponse("admin_files.html", {"request": request, "files": files, "message": message})
 
