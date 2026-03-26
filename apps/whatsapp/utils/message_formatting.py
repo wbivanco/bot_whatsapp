@@ -204,7 +204,7 @@ def list_message(number, sections):
             "interactive": {
                 "type": "list",
                 "body": {
-                    "text": "✅ Tengo estas opciones para ti:"
+                    "text": "✅ Tengo estas opciones para vos:"
                 },
                 "footer": {
                     "text": "Selecciona una opción de la lista"
