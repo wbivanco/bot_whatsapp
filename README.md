@@ -40,7 +40,15 @@ SCM_RUN_FROM_PACKAGE
 WEBSITE_RUN_FROM_PACKAGE 
 WEBSITE_RUN_FROM_ZIP
 
-Startup Command: python -m uvicorn backend:app –host 0.0.0.0 –port 8000
+Startup Command en Azure:
+
+`python -m uvicorn backend:app --host 0.0.0.0 --port 8000`
+
+(Opcional) `bash startup.sh` si en algún deploy subís un `chroma_vector_store.tgz` suelto para descomprimir antes de arrancar.
+
+Desarrollo local: `uvicorn backend:app --reload`
+
+**Nota:** `db/dbchroma/` no se versiona (`.gitignore`). El índice se genera en el servidor al subir documentos y ejecutar embeddings; así el ZIP de deploy no incluye binarios grandes de Chroma y evitás fallos de rsync en Kudu.
 
 ------------------------------------------------------------------------
 
@@ -85,16 +93,16 @@ El proyecto incluye un workflow de GitHub Actions que despliega automáticamente
    - Haz un commit y push a `main` → se desplegará automáticamente
    - O ejecuta manualmente: Actions → "Deploy to Azure App Service" → Run workflow
 
-**Nota:** El workflow despliega **todo el repositorio** tal como está en Git (`package: .`): código, `files/uploads/` y `db/dbchroma/` **solo si están commiteados**. No están en `.gitignore`.
+**Nota:** El workflow despliega el repo con `package: .`. **`db/dbchroma/` está en `.gitignore`** (no va en Git ni en el ZIP): el índice vectorial se crea **en Azure** después del deploy.
 
-**Flujo recomendado (proyecto pequeño, conocimiento versionado):**
+**Flujo recomendado:**
 
-1. Subí o actualizá PDF/DOCX/TXT desde el panel (o copiá en `files/uploads/`).
-2. Generá embeddings (panel o `GET /chatbot/generate_embeddings/` con la app en marcha).
-3. Commiteá y pusheá **ambos**: `files/uploads/` y `db/dbchroma/` (incluye `chroma.sqlite3` y subcarpetas de la colección).
-4. El push a `main` dispara el deploy; en los logs de Actions verás el paso *Conocimiento y Chroma en el paquete de deploy* con el conteo de archivos.
+1. Desplegá código (push a `main`).
+2. En Azure, configurá **`OPENAI_API_KEY`** en Application Settings.
+3. Subí PDF/DOCX/TXT desde el panel (o sincronizá `files/uploads/` si lo versionás).
+4. Generá embeddings (subida de archivo ya lo dispara, o `GET /chatbot/generate_embeddings/`).
 
-Si esas carpetas no aparecen en el checkout del Action, en Azure el bot arrancará sin documentos indexados hasta que vuelvas a subir archivos y regenerés embeddings **en el servidor** o hagas un nuevo commit con los datos.
+Opcional: versioná `files/uploads/` en Git si querés documentos fijos en cada deploy; la base Chroma siempre se regenera en el entorno donde corre la app.
 
 **Archivo de configuración:** `.github/workflows/azure-deploy.yml`
 

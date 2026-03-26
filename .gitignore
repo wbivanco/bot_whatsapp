@@ -49,6 +49,5 @@ env.bak/
 venv.bak/
 .env
 
-# Documentos y BD vectorial: NO agregar a .gitignore — se versionan y van en el zip de deploy (GitHub Actions → Azure).
-# files/uploads/  — base de conocimiento
-# db/dbchroma/    — Chroma persistido (regenerar y commitear tras cambiar documentos)
+# Base vectorial Chroma: no versionar — se genera en cada entorno (local o Azure) al subir documentos y generar embeddings.
+db/dbchroma/

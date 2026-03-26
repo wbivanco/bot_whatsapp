@@ -32,20 +32,14 @@ jobs:
         echo "Verificando requirements.txt..."
         test -f requirements.txt && echo "✓ requirements.txt encontrado" || echo "✗ requirements.txt no encontrado"
 
-    - name: Conocimiento y Chroma en el paquete de deploy
+    - name: Conocimiento en el paquete de deploy
       run: |
-        echo "El deploy sube el contenido del repo (package: .). Estas carpetas deben estar commiteadas si querés RAG en Azure:"
+        echo "db/dbchroma está en .gitignore: el índice no va en el ZIP (se crea en Azure al generar embeddings)."
         if [ -d files/uploads ]; then
           n=$(find files/uploads -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
-          echo "✓ files/uploads: $n archivo(s)"
+          echo "✓ files/uploads: $n archivo(s) en el repo (si los commiteás)"
         else
           echo "⚠ files/uploads no existe en el checkout"
-        fi
-        if [ -d db/dbchroma ]; then
-          echo "✓ db/dbchroma presente (colección embebida local)"
-          ls -la db/dbchroma | head -20
-        else
-          echo "⚠ db/dbchroma no existe en el checkout"
         fi
 
     - name: Desplegar a Azure App Service
