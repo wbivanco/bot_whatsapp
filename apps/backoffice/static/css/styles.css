@@ -7,10 +7,13 @@ body {
 .container {
     display: flex;
     height: 100vh;
+    overflow: hidden;
+    align-items: stretch;
 }
 
 .sidebar {
     width: 250px;
+    flex-shrink: 0;
     background-color: #064686;
     padding: 15px;
 }
@@ -46,6 +49,10 @@ body {
 
 .content {
     flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 20px;
     background-color: #ecf0f1;
 }

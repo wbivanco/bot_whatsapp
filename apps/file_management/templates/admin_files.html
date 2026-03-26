@@ -19,7 +19,8 @@
 {% endif %}
 
 {% if files %}
-<table>
+<div class="files-panel-table-wrap">
+<table class="files-panel-table">
     <thead>
         <tr>
             <th>Archivo</th>
@@ -42,6 +43,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p class="alert-info">No hay archivos disponibles.</p>
 {% endif %}

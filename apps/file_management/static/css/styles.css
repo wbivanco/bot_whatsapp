@@ -1,11 +1,32 @@
-table {
+/* Contenedor para muchas filas / nombres largos sin romper el layout */
+.files-panel-table-wrap {
     width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    margin-top: 0.5rem;
+}
+
+table.files-panel-table {
+    width: 100%;
+    max-width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 th, td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    vertical-align: middle;
+}
+.files-panel-table td:first-child {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+}
+.files-panel-table th:last-child,
+.files-panel-table td:last-child {
+    width: 9rem;
+    white-space: nowrap;
 }
 th {
     background-color: #f2f2f2;
