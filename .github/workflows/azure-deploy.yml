@@ -34,10 +34,9 @@ jobs:
 
     - name: Conocimiento en el paquete de deploy
       run: |
-        echo "db/dbchroma está en .gitignore: el índice no va en el ZIP (se crea en Azure al generar embeddings)."
+        echo "db/dbchroma y files/uploads/* están en .gitignore: el deploy solo lleva código."
         if [ -d files/uploads ]; then
-          n=$(find files/uploads -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
-          echo "✓ files/uploads: $n archivo(s) en el repo (si los commiteás)"
+          echo "✓ files/uploads/ existe (normalmente solo .gitkeep en el repo)"
         else
           echo "⚠ files/uploads no existe en el checkout"
         fi

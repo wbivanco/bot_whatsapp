@@ -93,16 +93,14 @@ El proyecto incluye un workflow de GitHub Actions que despliega automáticamente
    - Haz un commit y push a `main` → se desplegará automáticamente
    - O ejecuta manualmente: Actions → "Deploy to Azure App Service" → Run workflow
 
-**Nota:** El workflow despliega el repo con `package: .`. **`db/dbchroma/` está en `.gitignore`** (no va en Git ni en el ZIP): el índice vectorial se crea **en Azure** después del deploy.
+**Nota:** El workflow despliega el repo con `package: .`. **`db/dbchroma/`** y **`files/uploads/*`** están en **`.gitignore`**: ni el índice vectorial ni los PDF/DOCX van en Git ni en el ZIP de deploy. En cada entorno (local o Azure) subís los documentos **desde el panel** y se generan los embeddings ahí.
 
 **Flujo recomendado:**
 
 1. Desplegá código (push a `main`).
 2. En Azure, configurá **`OPENAI_API_KEY`** en Application Settings.
-3. Subí PDF/DOCX/TXT desde el panel (o sincronizá `files/uploads/` si lo versionás).
-4. Generá embeddings (subida de archivo ya lo dispara, o `GET /chatbot/generate_embeddings/`).
-
-Opcional: versioná `files/uploads/` en Git si querés documentos fijos en cada deploy; la base Chroma siempre se regenera en el entorno donde corre la app.
+3. Subí PDF/DOCX/TXT desde el panel de administración.
+4. La subida dispara la regeneración de embeddings (o usá `GET /chatbot/generate_embeddings/`).
 
 **Archivo de configuración:** `.github/workflows/azure-deploy.yml`
 
@@ -151,10 +149,9 @@ Los documentos se guardan en las siguientes carpetas (relativas a la raíz del p
    - Variable de entorno: `PERSIST_CHROMADB_FOLDER = 'db/dbchroma'`
 
 **Nota importante sobre el repositorio:**
-- Los documentos en `files/uploads/` **SÍ se suben al repositorio** para mantener integridad referencial
-- La base de datos de embeddings (`db/dbchroma/`) **TAMBIÉN se sube** al repositorio para mantener integridad completa
-- Cada cambio en `files/uploads/` actualiza automáticamente la BD vectorial mediante el CRUD de administración
-- Ambos deben estar sincronizados en el repositorio para mantener la integridad referencial
+- `files/uploads/` y `db/dbchroma/` **no se versionan** (`.gitignore`): los documentos y el índice viven **solo en cada entorno** (local o servidor).
+- Al subir o borrar archivos desde el panel se actualiza la BD vectorial en ese mismo entorno.
+- Si necesitás la misma base en otro servidor, subí los mismos documentos allí y regenerá embeddings.
 
 ------------------------------------------------------------------------
 # Para generar los distintos archivos con el scraper hay que pasar los valores en el body:

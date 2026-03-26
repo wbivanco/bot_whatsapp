@@ -51,3 +51,7 @@ venv.bak/
 
 # Base vectorial Chroma: no versionar — se genera en cada entorno (local o Azure) al subir documentos y generar embeddings.
 db/dbchroma/
+
+# Documentos de conocimiento: no versionar — se suben desde el panel en cada entorno (local o Azure).
+files/uploads/*
+!files/uploads/.gitkeep
