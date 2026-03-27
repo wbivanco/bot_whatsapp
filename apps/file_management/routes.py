@@ -1,13 +1,14 @@
 import os
 from fastapi import APIRouter, HTTPException, UploadFile, File, Request, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from base.load_env import load_env
 from base.sessions import require_session
 
 from apps.chatbot.routes import create_embeddings
 from ia.embeddings.manage_embeddings import EmbeddingsManager
+from apps.whatsapp.services.chat_interaction_log import get_log_path
 
 router = APIRouter()
 
@@ -27,6 +28,25 @@ def _list_visible_upload_files(directory: str) -> list:
         f
         for f in os.listdir(directory)
         if not f.startswith(".")
+    )
+
+
+@router.get("/download_whatsapp_log")
+async def download_whatsapp_log(request: Request):
+    """Descarga el CSV de interacciones (solo pruebas; quitar cuando no haga falta)."""
+    response = require_session(request)
+    if isinstance(response, RedirectResponse):
+        return response
+    path = get_log_path()
+    if not path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Aún no hay archivo de registro de conversaciones.",
+        )
+    return FileResponse(
+        path,
+        filename="interacciones_whatsapp.csv",
+        media_type="text/csv; charset=utf-8",
     )
 
 

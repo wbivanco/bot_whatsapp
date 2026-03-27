@@ -6,6 +6,7 @@ from .utils.message_formatting import text_message
 from .utils.message_processing import get_text_user, process_message, set_user_state, show_navigation_buttons, get_user_state
 import apps.whatsapp.services.whatsapp_service as whatsapp_service
 import apps.whatsapp.services.chatgpt_service as chatgpt_service
+from apps.whatsapp.services.chat_interaction_log import append_interaction, summarize_outgoing_whatsapp_data
 from base.load_env import load_env
 
 router = APIRouter()
@@ -83,7 +84,11 @@ async def received_message(request: Request):
         
         # Verifica el contenido de text y de acuero a eso arma la lista de mensajes a enviar
         list_data = process_message(text, number)
-        
+
+        outgoing_parts: list[str] = []
+        query_topic_used = ""
+        used_ia = False
+
         for item in list_data:
             # Verifica si el mensaje necesita ser procesado con ChatGPT
             needs_chatgpt = item.get("needs_chatgpt", False)
@@ -91,6 +96,8 @@ async def received_message(request: Request):
             if needs_chatgpt:
                 # Construir el contexto de la consulta con el tema seleccionado
                 query_topic = item.get("query_topic", "")
+                if query_topic and not query_topic_used:
+                    query_topic_used = query_topic
                 user_query = text
                 if query_topic:
                     # Agregar contexto del tema a la consulta
@@ -106,6 +113,8 @@ async def received_message(request: Request):
                 print(f"[Routes] Respuesta de ChatGPT: {responsegpt[:100] if responsegpt and responsegpt != 'error' else responsegpt}")
 
                 if responsegpt and responsegpt != "error" and len(responsegpt.strip()) > 0:
+                    used_ia = True
+                    outgoing_parts.append(responsegpt)
                     # Enviar respuesta de ChatGPT
                     data = text_message(responsegpt, number)
                     result = whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
@@ -125,6 +134,9 @@ async def received_message(request: Request):
                         for nav_item in navigation_buttons:
                             if nav_item.get("data"):
                                 print(f"Enviando botón con data: {nav_item['data']}")
+                                outgoing_parts.append(
+                                    summarize_outgoing_whatsapp_data(nav_item["data"])
+                                )
                                 result_btn = whatsapp_service.send_message_whatsapp(nav_item["data"], token_whatsapp, api_url)
                                 print(f"Resultado de envío de botones: {result_btn}")
                             else:
@@ -134,18 +146,34 @@ async def received_message(request: Request):
                         import traceback
                         traceback.print_exc()
                 else:
+                    used_ia = True
                     error_msg = "Ocurrió un error al procesar tu consulta. Por favor, intenta nuevamente o contacta con la secretaría."
+                    outgoing_parts.append(f"[Error IA] {error_msg}")
                     print(f"[Routes] Error: respuesta de ChatGPT inválida. Valor: {responsegpt}")
                     data = text_message(error_msg, number)
                     whatsapp_service.send_message_whatsapp(data, token_whatsapp, api_url)
             elif item.get("type", False) and item.get("data"):
                 # Mensaje predefinido (menú, instrucciones, etc.)
+                outgoing_parts.append(summarize_outgoing_whatsapp_data(item["data"]))
                 whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
             elif not item.get("type", True) and not needs_chatgpt:
                 # Mensaje que no se reconoce pero no necesita ChatGPT
                 if item.get("data"):
+                    outgoing_parts.append(summarize_outgoing_whatsapp_data(item["data"]))
                     whatsapp_service.send_message_whatsapp(item["data"], token_whatsapp, api_url)
-         
+
+        if list_data:
+            try:
+                append_interaction(
+                    telefono=number,
+                    mensaje_usuario=text or "",
+                    uso_ia=used_ia,
+                    tema_menu=query_topic_used,
+                    respuesta_bot=" || ".join(outgoing_parts),
+                )
+            except Exception as log_err:
+                print(f"[Log interacciones] {log_err}")
+
         return {"status": "EVENT_RECEIVED"}
     except Exception as e:
         print(f"Error en received_message: {str(e)}")
