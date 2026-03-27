@@ -48,6 +48,14 @@ def clear_user_state(number):
     if number in user_states:
         del user_states[number]
 
+# Texto fijo antes de pedir la consulta (p. ej. horarios de atención presencial).
+# Enunciado informativo: no hace falta mencionar qué canales no están disponibles.
+MSG_HORARIOS_DIVISION_ALUMNOS = (
+    "📌 *División Alumnos — horarios de atención*\n"
+    "• Mañana: 8 a 12 h\n"
+    "• Tarde: 16 a 20 h"
+)
+
 def get_option_name(option_id):
     """Mapea el ID de la opción a su nombre descriptivo."""
     options_map = {
@@ -250,6 +258,14 @@ def process_message(text, number):
 
     if selected_option_id:
         option_name = option_map[selected_option_id]
+        if selected_option_id == "contacto":
+            list_data.append(
+                {
+                    "data": mf.text_message(MSG_HORARIOS_DIVISION_ALUMNOS, number),
+                    "type": True,
+                    "needs_chatgpt": False,
+                }
+            )
         data = mf.text_message(f"📋 Escribí tu consulta respecto de \"{option_name}\"", number)
         list_data.append({'data': data, 'type': True, 'needs_chatgpt': False})
         set_user_state(number, "waiting_query", selected_option_id)

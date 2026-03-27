@@ -134,9 +134,6 @@ async def received_message(request: Request):
                         for nav_item in navigation_buttons:
                             if nav_item.get("data"):
                                 print(f"Enviando botón con data: {nav_item['data']}")
-                                outgoing_parts.append(
-                                    summarize_outgoing_whatsapp_data(nav_item["data"])
-                                )
                                 result_btn = whatsapp_service.send_message_whatsapp(nav_item["data"], token_whatsapp, api_url)
                                 print(f"Resultado de envío de botones: {result_btn}")
                             else:
