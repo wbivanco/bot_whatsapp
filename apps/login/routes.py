@@ -10,10 +10,9 @@ templates = Jinja2Templates(directory="apps/login/templates")
 
 router = APIRouter()
 
-# Encriptar las contraseñas
+# Un solo usuario del panel (credenciales en código para despliegues sin .env).
 users = {
-    "user1": bcrypt.hashpw("pass1".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
-    "user2": bcrypt.hashpw("pass2".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    "hbunca": bcrypt.hashpw("fhu1928.".encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
 }
 
 @router.get("/login", response_class=HTMLResponse)
